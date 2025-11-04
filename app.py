@@ -36,7 +36,7 @@ with icol1:
         "Metode for dokumentspec - Stikkord, Urnliste eller Excel",
         options=["Stikkord", "Urnliste", "Excelkorpus"],
         help="Lim inn en tekst med URNer, eller last opp et excelark med korpus"
-        " lagd for eksempel med https://beta.nb.no/dhlab/korpus/, "
+        " lagd for eksempel med https://dh.nb.no/run/corp-conc-coll-webapp/app/, "
         "eller antyd en grupper tekster ved hjelp av stikkord",
     )
 
@@ -49,7 +49,7 @@ with icol2:
             "og kan inneholde mer enn URNer",
         )
         if urner != "":
-            urns = re.findall("URN:NBN[^\s.,]+", urner)
+            urns = re.findall(r"URN:NBN[^\s.,]+", urner)
             if urns != []:
                 corpus_defined = True
                 corpus = dh.Corpus(doctype="digibok", limit=0)
