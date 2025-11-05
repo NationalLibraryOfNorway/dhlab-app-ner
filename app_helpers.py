@@ -86,19 +86,22 @@ def ensure_xlsx_extension(filename: str) -> str:
     return filename
 
 
-def generate_default_filename(urn: str, start_to: tuple[int, int]) -> str:
+def generate_default_filename(
+    urn: str, selected_start_page: int, selected_stop_page: int
+) -> str:
     """
-    Generate a default filename from URN and page range.
+    Generate a filename from URN and page range.
 
     Args:
         urn: Document URN
-        start_to: Tuple of (start_page, end_page)
+        selected_start_page: first page of document for analysis
+        selected_stop_page: last page of document for analysis
 
     Returns:
         Default filename with .xlsx extension
     """
     urn_id = extract_urn_id(urn)
-    return f"{urn_id}_{start_to[0]}_{start_to[1]}.xlsx"
+    return f"{urn_id}_{selected_start_page}_{selected_stop_page}.xlsx"
 
 
 def validate_page_range(start_to: tuple[int, int], max_pages: int) -> tuple[int, int]:
@@ -353,19 +356,21 @@ def render_text_selection_ui(
         if last < 1:
             last = 500
 
-        start_to = st.slider(
-            "Velg sidetall",
+        selected_start_page, selected_stop_page = st.slider(
+            "Velg sidetall (om ingenting endres blir hele teksten analysert)",
             min_value=0,
             max_value=last,
             value=(0, last),
-            help="Sidetall for det området i teksten analysen skal gjøres."
-            "Om ikke noe settes blir hele teksten analysert",
+            help="Sidetall for det området i teksten analysen skal gjøres.",
         )
-        if start_to[1] < 4:
-            start_to = (0, 4)
+        if selected_stop_page < 4:
+            selected_start_page = 0
+            selected_stop_page = 4
 
     with txt_col2:
-        default_filename = generate_default_filename(urn, start_to)
+        default_filename = generate_default_filename(
+            urn, selected_start_page, selected_stop_page
+        )
         filename = st.text_input(
             "Foreslått filnavn",
             default_filename,
@@ -374,7 +379,7 @@ def render_text_selection_ui(
 
     filename = ensure_xlsx_extension(filename)
 
-    return urn, start_to, filename
+    return urn, (selected_start_page, selected_stop_page), filename
 
 
 def render_analysis_config_ui() -> tuple[str, str, list[str]]:
