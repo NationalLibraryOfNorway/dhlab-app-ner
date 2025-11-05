@@ -13,16 +13,21 @@ from app_helpers import (
 
 
 def header():
-    head_col1, _, _, head_col2, head_col3 = st.columns(5)
+    head_col1, head_col2 = st.columns(2)
 
     with head_col1:
         st.title("Navn og steder")
+        st.markdown(
+            "Her kan du bruke språkmodellene i [SpaCy](https://spacy.io/models/nb) for å analysere spesifikke dokumenter i NBs digitale samling."
+        )
+        st.markdown(
+            "Du kan velge NER (named entity recognition) for å hente ut navn fra teksten, eller POS (part of speech) for å hente ut ordklasser."
+        )
     with head_col2:
-        st.markdown("Les mer om [Digital Humaniora - DH](https://nb.no/dh-lab)")
-        st.markdown("og språkmodellene i [spaCy](https://spacy.io/models/nb). ")
-    with head_col3:
         image = Image.open("DHlab_logo_web_en_black.png")
         st.image(image)
+
+        st.markdown("Les mer om [DH-laben på NB](https://nb.no/dh-lab)")
 
 
 st.set_page_config(layout="wide")
@@ -49,8 +54,7 @@ if choices:
     # Step 3: Run analysis
     with st.form(key="my_form"):
         submit_button = st.form_submit_button(
-            label="Analyser URN",
-            help="det kan ta inntil et halvt minutt å analysere teksten",
+            label="Analyser dokumentet (det kan ta inntil et halvt minutt å analysere teksten)",
         )
 
         if submit_button:

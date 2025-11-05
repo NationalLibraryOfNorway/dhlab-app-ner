@@ -13,7 +13,7 @@ import re
 import pandas as pd
 import streamlit as st
 import dhlab as dh
-from functions import get_ner, get_pos
+from functions import get_corpus, get_ner, get_pages, get_pos, to_excel
 
 
 # Constants
@@ -52,8 +52,8 @@ def generate_choices_from_corpus(corpus: pd.DataFrame) -> list[str]:
         return []
 
     choices = [
-        ", ".join([str(z) for z in x])
-        for x in corpus[["authors", "title", "year", "urn"]].values.tolist()
+        ", ".join([str(value) for value in row])
+        for row in corpus[["authors", "title", "year", "urn"]].values.tolist()
     ]
     return choices
 
@@ -273,20 +273,16 @@ def define_corpus_from_ui() -> tuple[bool, pd.DataFrame | None, list[str]]:
 
     with icol1:
         method = st.selectbox(
-            "Metode for dokumentspec - Stikkord, Urnliste eller Excel",
-            options=["Stikkord", "Urnliste", "Excelkorpus"],
-            help="Lim inn en tekst med URNer, eller last opp et excelark med korpus"
-            " lagd for eksempel med https://dh.nb.no/run/corp-conc-coll-webapp/app/, "
-            "eller antyd en grupper tekster ved hjelp av stikkord",
+            "Velg metode for å finne dokument",
+            options=["Stikkord", "URN", "Excelkorpus"],
+            help="Du kan skrive inn URN-koden til dokumentet direkte, søke etter dokumenter med stikkord, eller last opp et korpus-excelark fra DH-labens korpusbygger (https://dh.nb.no/run/corp-conc-coll-webapp/app/)",
         )
 
     with icol2:
-        if method == "Urnliste":
+        if method == "URN":
             urner = st.text_area(
-                "Lim inn URNer:",
-                "",
-                help="Lim tekst med URNer. Teksten trenger ikke å være formatert, "
-                "og kan inneholde mer enn URNer",
+                "Lim inn URN:",
+                help="Lim tekst med en eller flere URNer",
             )
             if urner != "":
                 urns = extract_urns_from_text(urner)
@@ -313,18 +309,13 @@ def define_corpus_from_ui() -> tuple[bool, pd.DataFrame | None, list[str]]:
 
         else:  # Stikkord
             stikkord = st.text_input(
-                "Angi noen stikkord for å forme et utvalg tekster",
-                "",
-                help="Skriv inn for eksempel forfatter og tittel for bøker, "
-                "eller avisnavn for aviser."
-                "For aviser kan dato skrives på formatet YYYYMMDD.",
+                label="Søk i dokumenttitler for å lage et utvalg tekster",
+                help="Skriv inn for eksempel forfatter og tittel for bøker, og avisnavn og dato (YYYYMMDD) for aviser.",
             )
 
             if stikkord == "":
                 stikkord = None
             corpus_defined = True
-            from functions import get_corpus
-
             corpus = get_corpus(freetext=stikkord)
 
     # Generate choices from corpus
@@ -354,12 +345,10 @@ def render_text_selection_ui(
     txt_col1, colpages, txt_col2 = st.columns([2, 1, 1])
 
     with txt_col1:
-        valg = st.selectbox("Plukk et tekst/dokument", choices)
+        valg = st.selectbox("Velg én tekst fra utvalget", choices)
         urn = valg.split(", ")[-1]
 
     with colpages:
-        from functions import get_pages
-
         try:
             last = int(get_pages(urn))
         except Exception:
@@ -368,7 +357,7 @@ def render_text_selection_ui(
             last = 500
 
         start_to = st.slider(
-            "Tekstområde",
+            "Velg sidetall",
             min_value=0,
             max_value=last,
             value=(0, last),
@@ -414,15 +403,14 @@ def render_analysis_config_ui() -> tuple[str, str, list[str]]:
 
     with colB:
         model = st.selectbox(
-            "Språkmodell",
+            "Velg språkmodell",
             dh.Models().models,
-            help="Forskjellige modeller gir"
-            "forskjellig resultat — da for dansk og nb for norsk bokmål",
+            help="Modellnavnet inneholder språkkode, treningsmateriale og størrelse (nb = norsk bokmål, en=engelsk, lg=large, md=medium, sm=small)",
         )
 
     with colN:
         types = st.multiselect(
-            "Vis analyse for",
+            "Velg kategorier",
             options=select_options,
             default=st.session_state[analyse_type],
         )
@@ -465,8 +453,6 @@ def render_download_button(df: pd.DataFrame, filename: str) -> None:
         df: DataFrame to download
         filename: Name for the downloaded file
     """
-    from functions import to_excel
-
     st.download_button(
         f"Last ned data i excelformat til '{filename}'",
         to_excel(df.reset_index()),
