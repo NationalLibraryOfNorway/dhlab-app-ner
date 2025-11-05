@@ -13,14 +13,23 @@ def get_corpus(freetext=None, title=None, from_year=1900, to_year=2020):
     return c.corpus
 
 
-def get_pages(urn):
+def get_page_count(urn: str) -> int:
+    """
+    Get the number of pages in a document from the NB API.
+
+    Args:
+        urn: Document URN
+
+    Returns:
+        Number of pages, or -1 if not found
+    """
     try:
-        x = f"https://api.nb.no/catalog/v1/metadata/{urn}/mods"
-        res = requests.get(x)
-        y = re.findall("extent>([0-9]+).*</extent", res.text)[0]
+        url = f"https://api.nb.no/catalog/v1/metadata/{urn}/mods"
+        response = requests.get(url)
+        page_count_match = re.findall("extent>([0-9]+).*</extent", response.text)[0]
+        return int(page_count_match)
     except Exception:
-        y = 0
-    return y
+        return -1
 
 
 @st.cache_data()

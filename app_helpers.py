@@ -13,7 +13,7 @@ import re
 import pandas as pd
 import streamlit as st
 import dhlab as dh
-from functions import get_corpus, get_ner, get_pages, get_pos, to_excel
+from functions import get_corpus, get_ner, get_page_count, get_pos, to_excel
 
 
 # Constants
@@ -349,10 +349,7 @@ def render_text_selection_ui(
         urn = valg.split(", ")[-1]
 
     with colpages:
-        try:
-            last = int(get_pages(urn))
-        except Exception:
-            last = 600
+        last = get_page_count(urn)
         if last < 1:
             last = 500
 
