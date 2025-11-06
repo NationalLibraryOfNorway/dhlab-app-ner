@@ -3,7 +3,7 @@
 import pandas as pd
 from io import BytesIO
 
-from functions import to_excel
+from dhlab_functions import to_excel
 
 
 def test_to_excel_simple_dataframe():

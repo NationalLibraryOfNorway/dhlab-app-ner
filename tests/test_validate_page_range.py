@@ -1,6 +1,6 @@
 """Tests for validate_page_range function."""
 
-from app_helpers import validate_page_range
+from document_utils import validate_page_range
 
 
 def test_validate_page_range_normal():

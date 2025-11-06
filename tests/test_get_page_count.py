@@ -1,13 +1,13 @@
 """Tests for get_page_count function with mocked HTTP requests."""
 
 from unittest.mock import Mock, patch
-from functions import get_page_count
+from document_utils import get_page_count
 
 
 class TestGetPageCount:
     """Test suite for get_page_count function."""
 
-    @patch("functions.requests.get")
+    @patch("document_utils.requests.get")
     def test_get_page_count_success(self, mock_get):
         """Test successful page count retrieval."""
         # Arrange
@@ -25,7 +25,7 @@ class TestGetPageCount:
             f"https://api.nb.no/catalog/v1/metadata/{urn}/mods"
         )
 
-    @patch("functions.requests.get")
+    @patch("document_utils.requests.get")
     def test_get_page_count_with_different_formats(self, mock_get):
         """Test page count extraction with various extent formats."""
         test_cases = [
@@ -48,7 +48,7 @@ class TestGetPageCount:
             # Assert
             assert result == expected_count, f"Failed for XML: {extent_xml}"
 
-    @patch("functions.requests.get")
+    @patch("document_utils.requests.get")
     def test_get_page_count_no_extent_tag(self, mock_get):
         """Test when extent tag is missing from response."""
         # Arrange
@@ -63,7 +63,7 @@ class TestGetPageCount:
         # Assert
         assert result == -1
 
-    @patch("functions.requests.get")
+    @patch("document_utils.requests.get")
     def test_get_page_count_empty_response(self, mock_get):
         """Test when API returns empty response."""
         # Arrange
@@ -78,7 +78,7 @@ class TestGetPageCount:
         # Assert
         assert result == -1
 
-    @patch("functions.requests.get")
+    @patch("document_utils.requests.get")
     def test_get_page_count_request_exception(self, mock_get):
         """Test when requests.get raises an exception."""
         # Arrange
@@ -91,7 +91,7 @@ class TestGetPageCount:
         # Assert
         assert result == -1
 
-    @patch("functions.requests.get")
+    @patch("document_utils.requests.get")
     def test_get_page_count_timeout(self, mock_get):
         """Test when request times out."""
         # Arrange
@@ -106,7 +106,7 @@ class TestGetPageCount:
         # Assert
         assert result == -1
 
-    @patch("functions.requests.get")
+    @patch("document_utils.requests.get")
     def test_get_page_count_connection_error(self, mock_get):
         """Test when connection fails."""
         # Arrange
@@ -121,7 +121,7 @@ class TestGetPageCount:
         # Assert
         assert result == -1
 
-    @patch("functions.requests.get")
+    @patch("document_utils.requests.get")
     def test_get_page_count_invalid_xml(self, mock_get):
         """Test when response contains malformed XML."""
         # Arrange
@@ -136,7 +136,7 @@ class TestGetPageCount:
         # Assert
         assert result == -1
 
-    @patch("functions.requests.get")
+    @patch("document_utils.requests.get")
     def test_get_page_count_multiple_extent_tags(self, mock_get):
         """Test when multiple extent tags exist (should return first match)."""
         # Arrange
@@ -154,7 +154,7 @@ class TestGetPageCount:
         # Assert
         assert result == 150  # Should return the first match
 
-    @patch("functions.requests.get")
+    @patch("document_utils.requests.get")
     def test_get_page_count_constructs_correct_url(self, mock_get):
         """Test that the correct API URL is constructed."""
         # Arrange
@@ -170,7 +170,7 @@ class TestGetPageCount:
         # Assert
         mock_get.assert_called_once_with(expected_url)
 
-    @patch("functions.requests.get")
+    @patch("document_utils.requests.get")
     def test_get_page_count_return_type_is_int(self, mock_get):
         """Test that return type is always int."""
         # Test success case

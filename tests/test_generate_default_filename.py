@@ -1,6 +1,6 @@
 """Tests for generate_default_filename function."""
 
-from app_helpers import generate_default_filename
+from document_utils import generate_default_filename
 
 
 def test_generate_default_filename():

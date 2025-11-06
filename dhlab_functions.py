@@ -1,7 +1,5 @@
 import streamlit as st
 import dhlab as dh
-import re
-import requests
 import pandas as pd
 
 from io import BytesIO
@@ -11,25 +9,6 @@ from io import BytesIO
 def get_corpus(freetext=None, title=None, from_year=1900, to_year=2020):
     c = dh.Corpus(freetext=freetext, title=title, from_year=from_year, to_year=to_year)
     return c.corpus
-
-
-def get_page_count(urn: str) -> int:
-    """
-    Get the number of pages in a document from the NB API.
-
-    Args:
-        urn: Document URN
-
-    Returns:
-        Number of pages, or -1 if not found
-    """
-    try:
-        url = f"https://api.nb.no/catalog/v1/metadata/{urn}/mods"
-        response = requests.get(url)
-        page_count_match = re.findall("extent>([0-9]+).*</extent", response.text)[0]
-        return int(page_count_match)
-    except Exception:
-        return -1
 
 
 @st.cache_data()

@@ -2,7 +2,7 @@
 
 import pandas as pd
 
-from app_helpers import generate_choices_from_corpus
+from document_utils import generate_choices_from_corpus
 
 
 def test_generate_choices_from_corpus(mock_corpus_dataframe):

@@ -2,10 +2,10 @@
 
 from unittest.mock import patch
 
-from app_helpers import process_ner_analysis
+from document_utils import process_ner_analysis
 
 
-@patch("app_helpers.get_ner")
+@patch("document_utils.get_ner")
 def test_process_ner_analysis(mock_get_ner, mock_ner_dataframe):
     """Test NER analysis processing."""
     # Setup mock

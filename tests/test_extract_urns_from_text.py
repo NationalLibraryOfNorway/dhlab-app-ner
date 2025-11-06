@@ -1,6 +1,6 @@
 """Tests for extract_urns_from_text function."""
 
-from app_helpers import extract_urns_from_text
+from document_utils import extract_urns_from_text
 
 
 def test_extract_urns_from_clean_text(sample_urns):

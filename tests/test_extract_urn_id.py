@@ -1,6 +1,6 @@
 """Tests for extract_urn_id function."""
 
-from app_helpers import extract_urn_id
+from document_utils import extract_urn_id
 
 
 def test_extract_urn_id():

@@ -2,10 +2,10 @@
 
 from unittest.mock import patch
 
-from app_helpers import process_pos_analysis
+from document_utils import process_pos_analysis
 
 
-@patch("app_helpers.get_pos")
+@patch("document_utils.get_pos")
 def test_process_pos_analysis(mock_get_pos, mock_pos_dataframe):
     """Test POS analysis processing."""
     # Setup mock

@@ -1,6 +1,6 @@
 """Tests for ensure_xlsx_extension function."""
 
-from app_helpers import ensure_xlsx_extension
+from document_utils import ensure_xlsx_extension
 
 
 def test_ensure_xlsx_extension_missing():

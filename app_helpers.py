@@ -10,15 +10,35 @@ This module contains utility functions for:
 """
 
 import re
+import requests
 import pandas as pd
 import streamlit as st
 import dhlab as dh
-from functions import get_corpus, get_ner, get_page_count, get_pos, to_excel
+from dhlab_functions import get_corpus, get_ner, get_pos, to_excel
 
 
 # Constants
 NER_OPTIONS = ["Navn", "Steder", "Organisasjoner", "Produkter", "Andre"]
 POS_OPTIONS = ["Substantiv", "Verb", "Adjektiv", "Preposisjon", "Andre"]
+
+
+def get_page_count(urn: str) -> int:
+    """
+    Get the number of pages in a document from the NB API.
+
+    Args:
+        urn: Document URN
+
+    Returns:
+        Number of pages, or -1 if not found
+    """
+    try:
+        url = f"https://api.nb.no/catalog/v1/metadata/{urn}/mods"
+        response = requests.get(url)
+        page_count_match = re.findall("extent>([0-9]+).*</extent", response.text)[0]
+        return int(page_count_match)
+    except Exception:
+        return -1
 
 
 def extract_urns_from_text(text: str) -> list[str]:
@@ -72,15 +92,6 @@ def extract_urn_id(urn: str) -> str:
 
 
 def ensure_xlsx_extension(filename: str) -> str:
-    """
-    Ensure filename has .xlsx extension.
-
-    Args:
-        filename: Original filename
-
-    Returns:
-        Filename with .xlsx extension
-    """
     if not filename.endswith(".xlsx"):
         return f"{filename}.xlsx"
     return filename
@@ -89,17 +100,6 @@ def ensure_xlsx_extension(filename: str) -> str:
 def generate_default_filename(
     urn: str, selected_start_page: int, selected_stop_page: int
 ) -> str:
-    """
-    Generate a filename from URN and page range.
-
-    Args:
-        urn: Document URN
-        selected_start_page: first page of document for analysis
-        selected_stop_page: last page of document for analysis
-
-    Returns:
-        Default filename with .xlsx extension
-    """
     urn_id = extract_urn_id(urn)
     return f"{urn_id}_{selected_start_page}_{selected_stop_page}.xlsx"
 
@@ -278,7 +278,7 @@ def define_corpus_from_ui() -> tuple[bool, pd.DataFrame | None, list[str]]:
         method = st.selectbox(
             "Velg metode for å finne dokument",
             options=["Stikkord", "URN", "Excelkorpus"],
-            help="Du kan skrive inn URN-koden til dokumentet direkte, søke etter dokumenter med stikkord, eller last opp et korpus-excelark fra DH-labens korpusbygger (https://dh.nb.no/run/corp-conc-coll-webapp/app/)",
+            help="Du kan skrive inn URN-koden til dokumentet direkte, søke etter dokumenter med stikkord, eller last opp et korpus-excelark fra DH-labens korpusbygger",
         )
 
     with icol2:
@@ -299,9 +299,7 @@ def define_corpus_from_ui() -> tuple[bool, pd.DataFrame | None, list[str]]:
 
         elif method == "Excelkorpus":
             uploaded_file = st.file_uploader(
-                "Last opp et korpus",
-                help="Dra en fil over hit, fra et nedlastningsikon, "
-                "eller velg fra en mappe",
+                "Last opp et korpus (excelfil fra DH-labens korpusbygger: https://dh.nb.no/run/corp-conc-coll-webapp/app/)"
             )
             if uploaded_file is not None:
                 corpus_defined = True
@@ -372,9 +370,9 @@ def render_text_selection_ui(
             urn, selected_start_page, selected_stop_page
         )
         filename = st.text_input(
-            "Foreslått filnavn",
+            "Filnavn utfil",
             default_filename,
-            help="Det er en lagringsknapp under analysetabellen",
+            help="Det kommer en lagringsknapp under analysetabellen",
         )
 
     filename = ensure_xlsx_extension(filename)
@@ -399,7 +397,7 @@ def render_analysis_config_ui() -> tuple[str, str, list[str]]:
 
     with colA:
         analyse_type = st.selectbox(
-            "Analysetype — navn (NER) eller kategorier (POS)", ["NER", "POS"]
+            "Analysetype — navn (NER) eller ordklasser (POS)", ["NER", "POS"]
         )
         select_options = get_selection_options(analyse_type)
 
@@ -412,7 +410,7 @@ def render_analysis_config_ui() -> tuple[str, str, list[str]]:
 
     with colN:
         types = st.multiselect(
-            "Velg kategorier",
+            "Velg analysekategorier",
             options=select_options,
             default=st.session_state[analyse_type],
         )

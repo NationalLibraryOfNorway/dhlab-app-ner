@@ -1,12 +1,14 @@
 import streamlit as st
 from PIL import Image
 
-from app_helpers import (
+from ui_components import (
     define_corpus_from_ui,
     render_text_selection_ui,
     render_analysis_config_ui,
     display_dataframes_in_columns,
     render_download_button,
+)
+from document_utils import (
     process_ner_analysis,
     process_pos_analysis,
 )
