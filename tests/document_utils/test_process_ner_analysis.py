@@ -9,11 +9,11 @@ from document_utils import process_ner_analysis
 def test_process_ner_analysis(mock_get_ner, mock_ner_dataframe):
     """Test NER analysis processing."""
     # Setup mock
-    personer = mock_ner_dataframe[mock_ner_dataframe["ner"].str.contains("PER")]
-    steder = mock_ner_dataframe[mock_ner_dataframe["ner"].str.contains("LOC")]
-    organisasjoner = mock_ner_dataframe[mock_ner_dataframe["ner"].str.contains("ORG")]
-    produkter = mock_ner_dataframe[mock_ner_dataframe["ner"].str.contains("PROD")]
-    andre = mock_ner_dataframe[
+    persons = mock_ner_dataframe[mock_ner_dataframe["ner"].str.contains("PER")]
+    locations = mock_ner_dataframe[mock_ner_dataframe["ner"].str.contains("LOC")]
+    organizations = mock_ner_dataframe[mock_ner_dataframe["ner"].str.contains("ORG")]
+    products = mock_ner_dataframe[mock_ner_dataframe["ner"].str.contains("PROD")]
+    others = mock_ner_dataframe[
         (~mock_ner_dataframe["ner"].str.contains("PER"))
         & (~mock_ner_dataframe["ner"].str.contains("ORG"))
         & (~mock_ner_dataframe["ner"].str.contains("PROD"))
@@ -22,16 +22,19 @@ def test_process_ner_analysis(mock_get_ner, mock_ner_dataframe):
 
     mock_get_ner.return_value = (
         mock_ner_dataframe,
-        personer,
-        steder,
-        organisasjoner,
-        produkter,
-        andre,
+        persons,
+        locations,
+        organizations,
+        products,
+        others,
     )
 
     # Execute
     df, lab_to_frame = process_ner_analysis(
-        urn="URN:NBN:no-nb_digibok_123", model="nb_core_news_sm", start_to=(0, 100)
+        urn="URN:NBN:no-nb_digibok_123",
+        model="nb_core_news_sm",
+        selected_start_page=0,
+        selected_stop_page=100,
     )
 
     # Verify

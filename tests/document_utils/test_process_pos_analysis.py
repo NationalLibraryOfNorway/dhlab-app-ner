@@ -11,9 +11,9 @@ def test_process_pos_analysis(mock_get_pos, mock_pos_dataframe):
     # Setup mock
     noun = mock_pos_dataframe[mock_pos_dataframe["pos"].str.contains("NOUN")]
     verb = mock_pos_dataframe[mock_pos_dataframe["pos"].str.contains("VERB")]
-    adjektiv = mock_pos_dataframe[mock_pos_dataframe["pos"].str.contains("ADJ")]
+    adjective = mock_pos_dataframe[mock_pos_dataframe["pos"].str.contains("ADJ")]
     prep = mock_pos_dataframe[mock_pos_dataframe["pos"].str.contains("ADP")]
-    andre = mock_pos_dataframe[
+    others = mock_pos_dataframe[
         (~mock_pos_dataframe["pos"].str.contains("NOUN"))
         & (~mock_pos_dataframe["pos"].str.contains("VERB"))
         & (~mock_pos_dataframe["pos"].str.contains("ADJ"))
@@ -24,14 +24,17 @@ def test_process_pos_analysis(mock_get_pos, mock_pos_dataframe):
         mock_pos_dataframe,
         noun,
         verb,
-        adjektiv,
+        adjective,
         prep,
-        andre,
+        others,
     )
 
     # Execute
     df, lab_to_frame = process_pos_analysis(
-        urn="URN:NBN:no-nb_digibok_123", model="nb_core_news_sm", start_to=(0, 100)
+        urn="URN:NBN:no-nb_digibok_123",
+        model="nb_core_news_sm",
+        selected_start_page=0,
+        selected_stop_page=100,
     )
 
     # Verify

@@ -68,13 +68,13 @@ def define_corpus_from_ui() -> tuple[pd.DataFrame | None, list[str]]:
                         corpus = get_corpus(urns=urns)
 
             case "Stikkord":
-                stikkord = st.text_input(
+                keyword = st.text_input(
                     label="Søk i dokumenttitler for å lage et utvalg tekster",
                     help="Skriv inn for eksempel forfatter og tittel for bøker, og avisnavn og dato (YYYYMMDD) for aviser.",
                 )
 
-                stikkord = stikkord if stikkord != "" else None
-                corpus = get_corpus(freetext=stikkord)
+                keyword = keyword if keyword != "" else None
+                corpus = get_corpus(freetext=keyword)
 
     # Generate choices from corpus
     if corpus is not None:
@@ -87,7 +87,7 @@ def define_corpus_from_ui() -> tuple[pd.DataFrame | None, list[str]]:
 
 def render_text_selection_ui(
     choices: list[str],
-) -> tuple[str, tuple[int, int], str] | None:
+) -> tuple[str, int, int, str] | None:
     """
     Render text selection UI with document picker, page range, and filename.
 
@@ -95,7 +95,7 @@ def render_text_selection_ui(
         choices: List of formatted document choices
 
     Returns:
-        Tuple of (urn, start_to, filename) or None if no choices
+        Tuple of (urn, selected_start_page, selected_stop_page, filename) or None if no choices
     """
     if not choices:
         return None
@@ -103,8 +103,8 @@ def render_text_selection_ui(
     txt_col1, colpages, txt_col2 = st.columns([2, 1, 1])
 
     with txt_col1:
-        valg = st.selectbox("Velg én tekst fra utvalget", choices)
-        urn = valg.split(", ")[-1]
+        choice = st.selectbox("Velg én tekst fra utvalget", choices)
+        urn = choice.split(", ")[-1]
 
     with colpages:
         last = get_page_count(urn)
@@ -134,7 +134,7 @@ def render_text_selection_ui(
 
     filename = ensure_xlsx_extension(filename)
 
-    return urn, (selected_start_page, selected_stop_page), filename
+    return urn, selected_start_page, selected_stop_page, filename
 
 
 def render_analysis_config_ui() -> tuple[str, str, list[str]]:

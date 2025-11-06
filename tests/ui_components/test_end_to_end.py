@@ -90,7 +90,7 @@ class TestWorkflowIntegration:
 
         # Process NER analysis
         df, lab_to_frame = process_ner_analysis(
-            "URN:NBN:no-nb_digibok_123456", "nb_core_news_lg", (0, 100)
+            "URN:NBN:no-nb_digibok_123456", "nb_core_news_lg", 0, 100
         )
 
         # Verify results
@@ -132,7 +132,7 @@ class TestWorkflowIntegration:
 
         # Process POS analysis
         df, lab_to_frame = process_pos_analysis(
-            "URN:NBN:no-nb_digibok_123456", "nb_core_news_lg", (0, 100)
+            "URN:NBN:no-nb_digibok_123456", "nb_core_news_lg", 0, 100
         )
 
         # Verify results
@@ -332,18 +332,18 @@ class TestDataFlow:
 
         mock_get_ner.return_value = (
             mock_df,
-            pd.DataFrame(columns=["ner", "frekv"]),  # personer
-            mock_df,  # steder
-            pd.DataFrame(columns=["ner", "frekv"]),  # org
-            pd.DataFrame(columns=["ner", "frekv"]),  # produkter
-            pd.DataFrame(columns=["ner", "frekv"]),  # andre
+            pd.DataFrame(columns=["ner", "frekv"]),  # persons
+            mock_df,  # locations
+            pd.DataFrame(columns=["ner", "frekv"]),  # organizations
+            pd.DataFrame(columns=["ner", "frekv"]),  # products
+            pd.DataFrame(columns=["ner", "frekv"]),  # others
         )
 
         mock_to_excel.return_value = b"excel_data"
 
         # Process analysis
         df, lab_to_frame = process_ner_analysis(
-            "URN:NBN:no-nb_digibok_123456", "nb_core_news_lg", (0, 100)
+            "URN:NBN:no-nb_digibok_123456", "nb_core_news_lg", 0, 100
         )
 
         # Export to Excel

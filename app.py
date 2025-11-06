@@ -14,7 +14,7 @@ from document_utils import (
 )
 
 
-def header():
+def header() -> None:
     head_col1, head_col2 = st.columns(2)
 
     with head_col1:
@@ -47,7 +47,7 @@ if choices:
     # Render text selection UI
     result = render_text_selection_ui(choices)
     if result:
-        urn, start_to, filename = result
+        urn, selected_start_page, selected_stop_page, filename = result
     else:
         st.stop()
 
@@ -61,9 +61,13 @@ if choices:
     ):
         # Process analysis based on type
         if analyse_type == "NER":
-            df, lab_to_frame = process_ner_analysis(urn, model, start_to)
+            df, lab_to_frame = process_ner_analysis(
+                urn, model, selected_start_page, selected_stop_page
+            )
         else:  # POS
-            df, lab_to_frame = process_pos_analysis(urn, model, start_to)
+            df, lab_to_frame = process_pos_analysis(
+                urn, model, selected_start_page, selected_stop_page
+            )
 
         df_defined = True
 

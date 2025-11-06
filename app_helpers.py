@@ -133,40 +133,40 @@ def validate_page_range(start_to: tuple[int, int], max_pages: int) -> tuple[int,
 
 
 def create_ner_label_mapping(
-    personer: pd.DataFrame,
-    steder: pd.DataFrame,
-    organisasjoner: pd.DataFrame,
-    produkter: pd.DataFrame,
-    andre: pd.DataFrame,
+    persons: pd.DataFrame,
+    locations: pd.DataFrame,
+    organizations: pd.DataFrame,
+    products: pd.DataFrame,
+    other: pd.DataFrame,
 ) -> dict[str, pd.DataFrame]:
     """
     Create mapping from Norwegian labels to NER dataframes.
 
     Args:
-        personer: DataFrame of person entities
-        steder: DataFrame of location entities
-        organisasjoner: DataFrame of organization entities
-        produkter: DataFrame of product entities
-        andre: DataFrame of other entities
+        persons: DataFrame of person entities
+        locations: DataFrame of location entities
+        organizations: DataFrame of organization entities
+        products: DataFrame of product entities
+        other: DataFrame of other entities
 
     Returns:
         Dictionary mapping labels to dataframes
     """
     return {
-        "Navn": personer,
-        "Steder": steder,
-        "Organisasjoner": organisasjoner,
-        "Produkter": produkter,
-        "Andre": andre,
+        "Navn": persons,
+        "Steder": locations,
+        "Organisasjoner": organizations,
+        "Produkter": products,
+        "Andre": other,
     }
 
 
 def create_pos_label_mapping(
     noun: pd.DataFrame,
     verb: pd.DataFrame,
-    adjektiv: pd.DataFrame,
+    adjective: pd.DataFrame,
     prep: pd.DataFrame,
-    andre: pd.DataFrame,
+    other: pd.DataFrame,
 ) -> dict[str, pd.DataFrame]:
     """
     Create mapping from Norwegian labels to POS dataframes.
@@ -174,9 +174,9 @@ def create_pos_label_mapping(
     Args:
         noun: DataFrame of nouns
         verb: DataFrame of verbs
-        adjektiv: DataFrame of adjectives
+        adjective: DataFrame of adjectives
         prep: DataFrame of prepositions
-        andre: DataFrame of other parts of speech
+        other: DataFrame of other parts of speech
 
     Returns:
         Dictionary mapping labels to dataframes
@@ -184,9 +184,9 @@ def create_pos_label_mapping(
     return {
         "Substantiv": noun,
         "Verb": verb,
-        "Adjektiv": adjektiv,
+        "Adjektiv": adjective,
         "Preposisjon": prep,
-        "Andre": andre,
+        "Andre": other,
     }
 
 
@@ -204,12 +204,12 @@ def process_ner_analysis(
     Returns:
         Tuple of (full_dataframe, label_to_frame_mapping)
     """
-    df, personer, steder, organisasjoner, produkter, andre = get_ner(
+    df, persons, locations, organizations, products, others = get_ner(
         urn, model, start_to[0], start_to[1]
     )
 
     lab_to_frame = create_ner_label_mapping(
-        personer, steder, organisasjoner, produkter, andre
+        persons, locations, organizations, products, others
     )
 
     return df, lab_to_frame
@@ -229,11 +229,11 @@ def process_pos_analysis(
     Returns:
         Tuple of (full_dataframe, label_to_frame_mapping)
     """
-    df, noun, verb, adjektiv, prep, andre = get_pos(
+    df, noun, verb, adjective, prep, other = get_pos(
         urn, model, start_to[0], start_to[1]
     )
 
-    lab_to_frame = create_pos_label_mapping(noun, verb, adjektiv, prep, andre)
+    lab_to_frame = create_pos_label_mapping(noun, verb, adjective, prep, other)
 
     return df, lab_to_frame
 
@@ -283,16 +283,16 @@ def define_corpus_from_ui() -> tuple[bool, pd.DataFrame | None, list[str]]:
 
     with icol2:
         if method == "URN":
-            urner = st.text_area(
+            urns = st.text_area(
                 "Lim inn URN:",
                 help="Lim tekst med en eller flere URNer",
             )
-            if urner != "":
-                urns = extract_urns_from_text(urner)
-                if urns:
+            if urns != "":
+                urn_list = extract_urns_from_text(urns)
+                if urn_list:
                     corpus_defined = True
                     corpus = dh.Corpus(doctype="digibok", limit=0)
-                    corpus.extend_from_identifiers(urns)
+                    corpus.extend_from_identifiers(urn_list)
                     corpus = corpus.corpus
                 else:
                     st.write("Fant ingen URNer")
@@ -309,15 +309,15 @@ def define_corpus_from_ui() -> tuple[bool, pd.DataFrame | None, list[str]]:
                 corpus = corpus.corpus
 
         else:  # Stikkord
-            stikkord = st.text_input(
+            keyword = st.text_input(
                 label="Søk i dokumenttitler for å lage et utvalg tekster",
                 help="Skriv inn for eksempel forfatter og tittel for bøker, og avisnavn og dato (YYYYMMDD) for aviser.",
             )
 
-            if stikkord == "":
-                stikkord = None
+            if keyword == "":
+                keyword = None
             corpus_defined = True
-            corpus = get_corpus(freetext=stikkord)
+            corpus = get_corpus(freetext=keyword)
 
     # Generate choices from corpus
     if corpus_defined and corpus is not None:
@@ -346,8 +346,8 @@ def render_text_selection_ui(
     txt_col1, colpages, txt_col2 = st.columns([2, 1, 1])
 
     with txt_col1:
-        valg = st.selectbox("Velg én tekst fra utvalget", choices)
-        urn = valg.split(", ")[-1]
+        choice = st.selectbox("Velg én tekst fra utvalget", choices)
+        urn = choice.split(", ")[-1]
 
     with colpages:
         last = get_page_count(urn)

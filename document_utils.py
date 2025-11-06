@@ -151,40 +151,40 @@ def validate_page_range(start_to: tuple[int, int], max_pages: int) -> tuple[int,
 
 
 def create_ner_label_mapping(
-    personer: pd.DataFrame,
-    steder: pd.DataFrame,
-    organisasjoner: pd.DataFrame,
-    produkter: pd.DataFrame,
-    andre: pd.DataFrame,
+    persons: pd.DataFrame,
+    locations: pd.DataFrame,
+    organizations: pd.DataFrame,
+    products: pd.DataFrame,
+    others: pd.DataFrame,
 ) -> dict[str, pd.DataFrame]:
     """
     Create mapping from Norwegian labels to NER dataframes.
 
     Args:
-        personer: DataFrame of person entities
-        steder: DataFrame of location entities
-        organisasjoner: DataFrame of organization entities
-        produkter: DataFrame of product entities
-        andre: DataFrame of other entities
+        persons: DataFrame of person entities
+        locations: DataFrame of location entities
+        organizations: DataFrame of organization entities
+        products: DataFrame of product entities
+        others: DataFrame of other entities
 
     Returns:
         Dictionary mapping labels to dataframes
     """
     return {
-        "Navn": personer,
-        "Steder": steder,
-        "Organisasjoner": organisasjoner,
-        "Produkter": produkter,
-        "Andre": andre,
+        "Navn": persons,
+        "Steder": locations,
+        "Organisasjoner": organizations,
+        "Produkter": products,
+        "Andre": others,
     }
 
 
 def create_pos_label_mapping(
     noun: pd.DataFrame,
     verb: pd.DataFrame,
-    adjektiv: pd.DataFrame,
+    adjective: pd.DataFrame,
     prep: pd.DataFrame,
-    andre: pd.DataFrame,
+    others: pd.DataFrame,
 ) -> dict[str, pd.DataFrame]:
     """
     Create mapping from Norwegian labels to POS dataframes.
@@ -192,9 +192,9 @@ def create_pos_label_mapping(
     Args:
         noun: DataFrame of nouns
         verb: DataFrame of verbs
-        adjektiv: DataFrame of adjectives
+        adjective: DataFrame of adjectives
         prep: DataFrame of prepositions
-        andre: DataFrame of other parts of speech
+        others: DataFrame of other parts of speech
 
     Returns:
         Dictionary mapping labels to dataframes
@@ -202,14 +202,14 @@ def create_pos_label_mapping(
     return {
         "Substantiv": noun,
         "Verb": verb,
-        "Adjektiv": adjektiv,
+        "Adjektiv": adjective,
         "Preposisjon": prep,
-        "Andre": andre,
+        "Andre": others,
     }
 
 
 def process_ner_analysis(
-    urn: str, model: str, start_to: tuple[int, int]
+    urn: str, model: str, selected_start_page: int, selected_stop_page: int
 ) -> tuple[pd.DataFrame, dict[str, pd.DataFrame]]:
     """
     Process NER analysis for a document.
@@ -217,24 +217,25 @@ def process_ner_analysis(
     Args:
         urn: Document URN
         model: SpaCy model name
-        start_to: Tuple of (start_page, end_page)
+        selected_start_page: First page of document for analysis
+        selected_stop_page: Last page of document for analysis
 
     Returns:
         Tuple of (full_dataframe, label_to_frame_mapping)
     """
-    df, personer, steder, organisasjoner, produkter, andre = get_ner(
-        urn, model, start_to[0], start_to[1]
+    df, persons, locations, organizations, products, others = get_ner(
+        urn, model, selected_start_page, selected_stop_page
     )
 
     lab_to_frame = create_ner_label_mapping(
-        personer, steder, organisasjoner, produkter, andre
+        persons, locations, organizations, products, others
     )
 
     return df, lab_to_frame
 
 
 def process_pos_analysis(
-    urn: str, model: str, start_to: tuple[int, int]
+    urn: str, model: str, selected_start_page: int, selected_stop_page: int
 ) -> tuple[pd.DataFrame, dict[str, pd.DataFrame]]:
     """
     Process POS analysis for a document.
@@ -242,16 +243,17 @@ def process_pos_analysis(
     Args:
         urn: Document URN
         model: SpaCy model name
-        start_to: Tuple of (start_page, end_page)
+        selected_start_page: First page of document for analysis
+        selected_stop_page: Last page of document for analysis
 
     Returns:
         Tuple of (full_dataframe, label_to_frame_mapping)
     """
-    df, noun, verb, adjektiv, prep, andre = get_pos(
-        urn, model, start_to[0], start_to[1]
+    df, noun, verb, adjective, prep, others = get_pos(
+        urn, model, selected_start_page, selected_stop_page
     )
 
-    lab_to_frame = create_pos_label_mapping(noun, verb, adjektiv, prep, andre)
+    lab_to_frame = create_pos_label_mapping(noun, verb, adjective, prep, others)
 
     return df, lab_to_frame
 
