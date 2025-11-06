@@ -55,25 +55,22 @@ if choices:
     analyse_type, model, types = render_analysis_config_ui()
 
     # Step 3: Run analysis
-    with st.form(key="my_form"):
-        submit_button = st.form_submit_button(
-            label="Analyser dokumentet (det kan ta inntil et halvt minutt å analysere teksten)",
-        )
+    if st.button(
+        "Analyser dokumentet (det kan ta inntil et halvt minutt å analysere teksten)",
+        type="primary",
+    ):
+        # Process analysis based on type
+        if analyse_type == "NER":
+            df, lab_to_frame = process_ner_analysis(urn, model, start_to)
+        else:  # POS
+            df, lab_to_frame = process_pos_analysis(urn, model, start_to)
 
-        if submit_button:
-            # Process analysis based on type
-            if analyse_type == "NER":
-                df, lab_to_frame = process_ner_analysis(urn, model, start_to)
-            else:  # POS
-                df, lab_to_frame = process_pos_analysis(urn, model, start_to)
+        df_defined = True
 
-            df_defined = True
+        # Display results in columns
+        display_dataframes_in_columns(types, lab_to_frame)
 
-            # Display results in columns
-            display_dataframes_in_columns(types, lab_to_frame)
-
-    # Step 4: Download button
-    if df_defined:
+        # Step 4: Download button (shown immediately after analysis)
         render_download_button(df, filename)
 else:
     st.write("Her dukker det opp en tekstvelger så snart listen av tekster er definert")

@@ -70,11 +70,10 @@ def generate_choices_from_corpus(corpus: pd.DataFrame) -> list[str]:
     if corpus.empty:
         return []
 
-    choices = [
+    return [
         ", ".join([str(value) for value in row])
         for row in corpus[["authors", "title", "year", "urn"]].values.tolist()
     ]
-    return choices
 
 
 def extract_urn_id(urn: str) -> str:
