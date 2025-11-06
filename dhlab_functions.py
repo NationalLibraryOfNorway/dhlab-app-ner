@@ -6,9 +6,17 @@ from io import BytesIO
 
 
 @st.cache_data()
-def get_corpus(freetext=None, title=None, from_year=1900, to_year=2020):
-    c = dh.Corpus(freetext=freetext, title=title, from_year=from_year, to_year=to_year)
-    return c.corpus
+def get_corpus(
+    freetext=None, title=None, from_year=1900, to_year=2020, urns: list[str] = []
+) -> pd.DataFrame:
+    if urns:
+        corpus = dh.Corpus(doctype="digibok", limit=0)
+        corpus.extend_from_identifiers(urns)
+    else:
+        corpus = dh.Corpus(
+            freetext=freetext, title=title, from_year=from_year, to_year=to_year
+        )
+    return corpus.corpus
 
 
 @st.cache_data()

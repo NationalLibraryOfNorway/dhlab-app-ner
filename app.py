@@ -37,7 +37,8 @@ header()
 st.markdown("----")
 
 # Step 1: Define corpus
-corpus_defined, corpus, choices = define_corpus_from_ui()
+corpus, choices = define_corpus_from_ui()
+corpus_defined = corpus is not None
 
 # Step 2: Configure text selection and analysis (if corpus is defined)
 df_defined = False

@@ -25,16 +25,15 @@ from document_utils import (
 )
 
 
-def define_corpus_from_ui() -> tuple[bool, pd.DataFrame | None, list[str]]:
+def define_corpus_from_ui() -> tuple[pd.DataFrame | None, list[str]]:
     """
     Handle corpus definition from UI (Urnliste, Excelkorpus, or Stikkord).
 
     Returns:
-        Tuple of (corpus_defined, corpus_dataframe, choices_list)
+        Tuple of (corpus_dataframe, choices_list)
     """
     icol1, icol2 = st.columns([1, 3])
 
-    corpus_defined = False
     corpus = None
 
     with icol1:
@@ -45,50 +44,45 @@ def define_corpus_from_ui() -> tuple[bool, pd.DataFrame | None, list[str]]:
         )
 
     with icol2:
-        if method == "URN":
-            urner = st.text_area(
-                "Lim inn URN:",
-                help="Lim tekst med en eller flere URNer",
-            )
-            if urner != "":
-                urns = extract_urns_from_text(urner)
-                if urns:
-                    corpus_defined = True
-                    corpus = dh.Corpus(doctype="digibok", limit=0)
-                    corpus.extend_from_identifiers(urns)
-                    corpus = corpus.corpus
-                else:
-                    st.write("Fant ingen URNer")
+        match method:
+            case "URN":
+                text_with_urns = st.text_area(
+                    "Lim inn URN:",
+                    help="Lim tekst med en eller flere URNer",
+                )
+                if text_with_urns != "":
+                    urns = extract_urns_from_text(text_with_urns)
+                    if urns:
+                        corpus = get_corpus(urns=urns)
+                    else:
+                        st.write("Fant ingen URNer")
 
-        elif method == "Excelkorpus":
-            uploaded_file = st.file_uploader(
-                "Last opp et korpus (excelfil fra DH-labens korpusbygger: https://dh.nb.no/run/corp-conc-coll-webapp/app/)"
-            )
-            if uploaded_file is not None:
-                corpus_defined = True
-                dataframe = pd.read_excel(uploaded_file)
-                corpus = dh.Corpus(doctype="digibok", limit=0)
-                corpus.extend_from_identifiers(list(dataframe.urn))
-                corpus = corpus.corpus
+            case "Excelkorpus":
+                uploaded_file = st.file_uploader(
+                    "Last opp et korpus (excelfil fra DH-labens korpusbygger: https://dh.nb.no/run/corp-conc-coll-webapp/app/)"
+                )
+                if uploaded_file is not None:
+                    dataframe = pd.read_excel(uploaded_file)
+                    urns = list(dataframe.urn)
+                    if urns:
+                        corpus = get_corpus(urns=urns)
 
-        else:  # Stikkord
-            stikkord = st.text_input(
-                label="Søk i dokumenttitler for å lage et utvalg tekster",
-                help="Skriv inn for eksempel forfatter og tittel for bøker, og avisnavn og dato (YYYYMMDD) for aviser.",
-            )
+            case "Stikkord":
+                stikkord = st.text_input(
+                    label="Søk i dokumenttitler for å lage et utvalg tekster",
+                    help="Skriv inn for eksempel forfatter og tittel for bøker, og avisnavn og dato (YYYYMMDD) for aviser.",
+                )
 
-            if stikkord == "":
-                stikkord = None
-            corpus_defined = True
-            corpus = get_corpus(freetext=stikkord)
+                stikkord = stikkord if stikkord != "" else None
+                corpus = get_corpus(freetext=stikkord)
 
     # Generate choices from corpus
-    if corpus_defined and corpus is not None:
+    if corpus is not None:
         choices = generate_choices_from_corpus(corpus)
     else:
         choices = []
 
-    return corpus_defined, corpus, choices
+    return corpus, choices
 
 
 def render_text_selection_ui(
